@@ -5,8 +5,8 @@ This module handles the core recommendation logic using
 content-based filtering with cosine similarity.
 
 How it works:
-1. Load movie data from CSV
-2. Combine text features (genre, keywords, director) into one string
+1. Load movie data from CSV + Kaggle Indian Movies dataset
+2. Combine text features (genre, keywords, director, language) into one string
 3. Convert text to numerical vectors using TF-IDF
 4. Calculate cosine similarity between all movies
 5. For given input movies, find the most similar ones
@@ -18,22 +18,107 @@ from sklearn.metrics.pairwise import cosine_similarity
 import os
 
 
-def load_movies(csv_path: str = None) -> pd.DataFrame:
+def load_kaggle_dataset() -> pd.DataFrame:
     """
-    Load the movie dataset from a CSV file.
-
-    Args:
-        csv_path: Path to the CSV file. Defaults to 'movies.csv' in the same directory.
+    Load the Indian Movies IMDb dataset from Kaggle using kagglehub.
+    Filters to movies with valid ratings and votes for quality recommendations.
 
     Returns:
-        DataFrame containing movie data.
+        DataFrame with standardized columns matching our format.
+    """
+    try:
+        import kagglehub
+
+        # Download the dataset (cached after first download)
+        path = kagglehub.dataset_download("nareshbhat/indian-moviesimdb")
+
+        # Find the CSV file in the downloaded directory
+        csv_files = [f for f in os.listdir(path) if f.endswith(".csv")]
+        if not csv_files:
+            return pd.DataFrame()
+
+        kaggle_df = pd.read_csv(os.path.join(path, csv_files[0]))
+
+        # ── Clean the Kaggle data ──
+
+        # Remove rows with missing or invalid ratings
+        kaggle_df = kaggle_df[kaggle_df["Rating(10)"] != "-"].copy()
+        kaggle_df["rating"] = pd.to_numeric(kaggle_df["Rating(10)"], errors="coerce")
+        kaggle_df = kaggle_df.dropna(subset=["rating"])
+
+        # Remove rows with missing genres
+        kaggle_df = kaggle_df[kaggle_df["Genre"] != "-"].copy()
+        kaggle_df = kaggle_df.dropna(subset=["Genre"])
+
+        # Clean votes: remove commas and convert to numeric
+        kaggle_df["votes_clean"] = kaggle_df["Votes"].str.replace(",", "", regex=False)
+        kaggle_df["votes_clean"] = pd.to_numeric(kaggle_df["votes_clean"], errors="coerce").fillna(0)
+
+        # Filter to movies with decent ratings and enough votes for quality
+        # This reduces ~50K movies to a manageable, high-quality subset
+        kaggle_df = kaggle_df[
+            (kaggle_df["rating"] >= 5.0) & (kaggle_df["votes_clean"] >= 500)
+        ].copy()
+
+        # Clean year column
+        kaggle_df["year"] = pd.to_numeric(kaggle_df["Year"], errors="coerce").fillna(0).astype(int)
+
+        # Standardize column names to match our format
+        result = pd.DataFrame()
+        result["movie_name"] = kaggle_df["Movie Name"].str.strip()
+        result["genre"] = kaggle_df["Genre"].str.strip()
+        result["director"] = ""  # Kaggle dataset doesn't have director info
+        result["year"] = kaggle_df["year"].values
+        result["rating"] = kaggle_df["rating"].values
+        # Use genre words + language as keywords for similarity
+        language = kaggle_df["Language"].fillna("").str.strip()
+        result["keywords"] = language + " " + result["genre"].str.replace(",", " ", regex=False)
+        result["source"] = "kaggle"
+
+        # Remove duplicates by movie name
+        result = result.drop_duplicates(subset=["movie_name"], keep="first")
+
+        return result.reset_index(drop=True)
+
+    except Exception as e:
+        print(f"Warning: Could not load Kaggle dataset: {e}")
+        return pd.DataFrame()
+
+
+def load_movies(csv_path: str = None) -> pd.DataFrame:
+    """
+    Load movie data from both the local CSV and the Kaggle Indian Movies dataset.
+    Merges them into a single DataFrame with standardized columns.
+
+    Args:
+        csv_path: Path to the local CSV file. Defaults to 'movies.csv' in the same directory.
+
+    Returns:
+        DataFrame containing combined movie data.
     """
     if csv_path is None:
         # Get the directory where this script is located
         base_dir = os.path.dirname(os.path.abspath(__file__))
         csv_path = os.path.join(base_dir, "movies.csv")
 
-    df = pd.read_csv(csv_path)
+    # ── Load the local curated CSV ──
+    local_df = pd.read_csv(csv_path)
+    local_df = local_df.fillna("")
+    local_df["source"] = "local"
+
+    # ── Load the Kaggle Indian Movies dataset ──
+    kaggle_df = load_kaggle_dataset()
+
+    # ── Merge both datasets ──
+    if not kaggle_df.empty:
+        # Avoid duplicates: remove Kaggle movies that already exist in local CSV
+        local_names = set(local_df["movie_name"].str.lower().str.strip())
+        kaggle_df = kaggle_df[
+            ~kaggle_df["movie_name"].str.lower().str.strip().isin(local_names)
+        ]
+        df = pd.concat([local_df, kaggle_df], ignore_index=True)
+    else:
+        df = local_df
 
     # Clean up: fill any missing values with empty strings
     df = df.fillna("")
@@ -49,8 +134,7 @@ def combine_features(row: pd.Series) -> str:
     Combine multiple features of a movie into a single text string.
     This combined string is used to calculate similarity between movies.
 
-    We combine: genre, keywords, director, and a text version of rating.
-    The rating is repeated to give it more weight in similarity calculation.
+    We combine: genre, keywords, director, language, and a text version of rating.
 
     Args:
         row: A single row from the movie DataFrame.
@@ -58,21 +142,31 @@ def combine_features(row: pd.Series) -> str:
     Returns:
         A combined feature string.
     """
-    # Repeat director name to give it moderate importance
-    director_text = (str(row["director"]) + " ") * 2
+    # Include director info if available (repeat for moderate importance)
+    director = str(row.get("director", "")).strip()
+    director_text = (director + " ") * 2 if director else ""
 
-    # Repeat rating category to give it some importance
-    # Convert rating to a descriptive category
-    rating = float(row["rating"]) if row["rating"] else 0
+    # Convert rating to a descriptive category for similarity matching
+    try:
+        rating = float(row["rating"]) if row["rating"] else 0
+    except (ValueError, TypeError):
+        rating = 0
+
     if rating >= 8.5:
         rating_text = "excellent highly_rated masterpiece "
     elif rating >= 7.5:
         rating_text = "good well_rated popular "
-    else:
+    elif rating >= 5.0:
         rating_text = "average decent watchable "
+    else:
+        rating_text = "low_rated "
+
+    # Get genre and keywords
+    genre = str(row.get("genre", ""))
+    keywords = str(row.get("keywords", ""))
 
     # Combine all features into one string
-    combined = f"{row['genre']} {row['keywords']} {director_text} {rating_text}"
+    combined = f"{genre} {keywords} {director_text} {rating_text}"
 
     return combined.lower()
 
@@ -90,7 +184,7 @@ def build_similarity_matrix(df: pd.DataFrame):
         df: Movie DataFrame.
 
     Returns:
-        A tuple of (similarity_matrix, tfidf_matrix).
+        A cosine similarity matrix (2D numpy array).
     """
     # Step 1: Create combined feature column
     df["combined_features"] = df.apply(combine_features, axis=1)
@@ -129,7 +223,7 @@ def find_movie_index(df: pd.DataFrame, movie_name: str) -> int:
         return exact_match.index[0]
 
     # Then try partial match (if user types part of the name)
-    partial_match = df[df["movie_name_lower"].str.contains(movie_name, na=False)]
+    partial_match = df[df["movie_name_lower"].str.contains(movie_name, na=False, regex=False)]
     if not partial_match.empty:
         return partial_match.index[0]
 
@@ -161,6 +255,7 @@ def get_recommendations(
         - "recommendations": list of recommended movie dicts
         - "not_found": list of movie names that weren't found in the dataset
         - "found": list of movie names that were successfully matched
+        - "total_movies": total number of movies in dataset
     """
     not_found = []
     found_indices = []
@@ -183,6 +278,7 @@ def get_recommendations(
             "recommendations": [],
             "not_found": not_found,
             "found": found_names,
+            "total_movies": len(df),
         }
 
     # Calculate average similarity scores across all input movies
@@ -198,13 +294,24 @@ def get_recommendations(
     for idx, score in scored_movies:
         if idx not in found_indices and score > 0:
             movie = df.loc[idx]
+
+            # Safely convert year and rating
+            try:
+                year = int(float(movie["year"])) if movie["year"] else 0
+            except (ValueError, TypeError):
+                year = 0
+            try:
+                rating = float(movie["rating"]) if movie["rating"] else 0.0
+            except (ValueError, TypeError):
+                rating = 0.0
+
             recommendations.append(
                 {
                     "name": movie["movie_name"],
                     "genre": movie["genre"],
-                    "director": movie["director"],
-                    "year": int(movie["year"]),
-                    "rating": float(movie["rating"]),
+                    "director": movie.get("director", ""),
+                    "year": year,
+                    "rating": rating,
                     "score": round(float(score), 4),
                 }
             )
@@ -215,4 +322,5 @@ def get_recommendations(
         "recommendations": recommendations,
         "not_found": not_found,
         "found": found_names,
+        "total_movies": len(df),
     }

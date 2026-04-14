@@ -138,15 +138,18 @@ def init_recommender():
 # Load everything
 df, similarity_matrix = init_recommender()
 
-# Get list of all movie names for reference
-all_movies = sorted(df["movie_name"].tolist())
-
 # ──────────────────────────────────────────────
 # Header
 # ──────────────────────────────────────────────
 st.markdown('<div class="main-title">🎬 Movie Recommender</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="sub-title">Enter 3 movies you love and discover 5 similar ones!</div>',
+    unsafe_allow_html=True,
+)
+st.markdown(
+    f'<div style="text-align:center; color:#8a85a0; font-size:0.85rem; margin-bottom:0.5rem;">'
+    f'📊 Powered by a dataset of <strong style="color:#a29bfe;">{len(df):,}</strong> movies '
+    f'(Hollywood + Indian Cinema)</div>',
     unsafe_allow_html=True,
 )
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
@@ -165,13 +168,6 @@ with col2:
     movie2 = st.text_input("Movie 2", placeholder="e.g. The Matrix")
 with col3:
     movie3 = st.text_input("Movie 3", placeholder="e.g. Interstellar")
-
-# Show available movies in an expander for reference
-with st.expander("📋 Browse available movies"):
-    # Display movies in a nice 3-column layout
-    cols = st.columns(3)
-    for i, movie in enumerate(all_movies):
-        cols[i % 3].write(f"• {movie}")
 
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
@@ -216,6 +212,16 @@ if recommend_clicked:
                 genres = movie["genre"].split()
                 genre_badges = " ".join(f'<span class="badge">{g}</span>' for g in genres[:3])
 
+                # Build details line (skip director if not available)
+                director = movie.get('director', '')
+                details_parts = []
+                if director:
+                    details_parts.append(f"🎬 <strong>Director:</strong> {director}")
+                if movie['year']:
+                    details_parts.append(f"📅 <strong>Year:</strong> {movie['year']}")
+                details_parts.append(f"⭐ <strong>Rating:</strong> {movie['rating']}")
+                details_line = " &nbsp;|&nbsp; ".join(details_parts)
+
                 # Render movie card
                 st.markdown(
                     f"""
@@ -224,9 +230,7 @@ if recommend_clicked:
                             <span class="rank">{i}</span>
                             <h3>{movie['name']}</h3>
                         </div>
-                        <p>🎬 <strong>Director:</strong> {movie['director']} &nbsp;|&nbsp;
-                           📅 <strong>Year:</strong> {movie['year']} &nbsp;|&nbsp;
-                           ⭐ <strong>Rating:</strong> {movie['rating']}</p>
+                        <p>{details_line}</p>
                         <p>{genre_badges}</p>
                         <p style="color:#8a85a0; font-size:0.82rem; margin-top:0.4rem;">
                            Similarity Score: {movie['score']}</p>
