@@ -1,4 +1,4 @@
-# 🎬 Movie Recommendation System
+ls# 🎬 Movie Recommendation System
 
 A simple, modern **Movie Recommendation System** built with **Python** and **Streamlit** that uses **Content-Based Filtering** with **Cosine Similarity** to suggest movies based on your preferences.
 
