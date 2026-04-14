@@ -1,0 +1,52 @@
+movie_name,genre,director,year,rating,keywords
+The Dark Knight,Action Crime Thriller,Christopher Nolan,2008,9.0,batman joker gotham crime hero vigilante
+Inception,Sci-Fi Action Thriller,Christopher Nolan,2010,8.8,dreams heist subconscious mind layers reality
+Interstellar,Sci-Fi Drama Adventure,Christopher Nolan,2014,8.6,space time travel wormhole love gravity
+The Matrix,Sci-Fi Action,Lana Wachowski,1999,8.7,virtual reality hacker chosen one simulation
+Fight Club,Drama Thriller,David Fincher,1999,8.8,identity rebellion underground anarchy alter ego
+The Shawshank Redemption,Drama,Frank Darabont,1994,9.3,prison hope freedom escape friendship justice
+Pulp Fiction,Crime Drama Thriller,Quentin Tarantino,1994,8.9,gangster hitman crime dark humor nonlinear
+Forrest Gump,Drama Romance Comedy,Robert Zemeckis,1994,8.8,life journey love war history innocence
+The Godfather,Crime Drama,Francis Ford Coppola,1972,9.2,mafia family power crime loyalty revenge
+Gladiator,Action Drama History,Ridley Scott,2000,8.5,roman empire revenge battle honor warrior
+Titanic,Drama Romance,James Cameron,1997,7.9,ship love tragedy ocean survival class
+Avatar,Sci-Fi Action Adventure,James Cameron,2009,7.9,alien planet nature technology war survival
+The Avengers,Action Sci-Fi Adventure,Joss Whedon,2012,8.0,superhero team alien invasion marvel heroes
+Iron Man,Action Sci-Fi Adventure,Jon Favreau,2008,7.9,superhero technology armor genius marvel billionaire
+Spider-Man,Action Adventure,Sam Raimi,2002,7.4,superhero spider powers responsibility villain city
+Batman Begins,Action Crime Thriller,Christopher Nolan,2005,8.2,batman origin fear gotham hero training
+The Prestige,Drama Mystery Thriller,Christopher Nolan,2006,8.5,magic rivalry obsession sacrifice illusion twin
+Memento,Mystery Thriller,Christopher Nolan,2000,8.4,memory loss revenge investigation time disorder
+Shutter Island,Mystery Thriller,Martin Scorsese,2010,8.2,island asylum detective twist paranoia identity
+The Departed,Crime Drama Thriller,Martin Scorsese,2006,8.5,undercover mafia cops betrayal boston crime
+Goodfellas,Crime Drama Biography,Martin Scorsese,1990,8.7,mafia gangster rise fall crime loyalty
+Schindler's List,Drama History,Steven Spielberg,1993,9.0,holocaust war rescue humanity list factory
+Saving Private Ryan,Drama War,Steven Spielberg,1998,8.6,war battle rescue soldiers honor sacrifice
+Jurassic Park,Sci-Fi Adventure Action,Steven Spielberg,1993,8.2,dinosaurs park science island chaos survival
+Django Unchained,Drama Western,Quentin Tarantino,2012,8.4,slavery revenge bounty hunter freedom western
+Kill Bill Vol 1,Action Crime Thriller,Quentin Tarantino,2003,8.2,revenge martial arts assassin bride sword
+Inglourious Basterds,Adventure Drama War,Quentin Tarantino,2009,8.3,war nazi revenge undercover mission cinema
+The Social Network,Drama Biography,David Fincher,2010,7.8,facebook startup genius betrayal technology college
+Se7en,Crime Mystery Thriller,David Fincher,1995,8.6,serial killer detective sins dark mystery rain
+Zodiac,Crime Drama Mystery,David Fincher,2007,7.7,serial killer investigation obsession newspaper code
+The Wolf of Wall Street,Biography Comedy Crime,Martin Scorsese,2013,8.2,wall street money greed fraud excess party
+Gravity,Sci-Fi Thriller Drama,Alfonso Cuaron,2013,7.7,space survival astronaut debris isolation earth
+The Martian,Sci-Fi Adventure Drama,Ridley Scott,2015,8.0,mars survival astronaut science rescue alone
+Blade Runner 2049,Sci-Fi Drama Mystery,Denis Villeneuve,2017,8.0,future replicant identity memory dystopia search
+Arrival,Sci-Fi Drama Mystery,Denis Villeneuve,2016,7.9,alien language time communication linguistics mother
+Dune,Sci-Fi Adventure Drama,Denis Villeneuve,2021,8.0,desert chosen one politics spice war empire
+Mad Max Fury Road,Action Adventure Sci-Fi,George Miller,2015,8.1,wasteland chase survival rebellion cars desert
+John Wick,Action Thriller Crime,Chad Stahelski,2014,7.4,assassin revenge dog underworld hitman action
+The Hunger Games,Action Adventure Sci-Fi,Gary Ross,2012,7.2,survival dystopia arena rebellion sacrifice youth
+Edge of Tomorrow,Action Sci-Fi,Doug Liman,2014,7.9,time loop alien war soldier repeat battle
+Tenet,Action Sci-Fi Thriller,Christopher Nolan,2020,7.3,time inversion espionage entropy future paradox
+Oppenheimer,Biography Drama History,Christopher Nolan,2023,8.3,atomic bomb scientist war politics moral physics
+Whiplash,Drama Music,Damien Chazelle,2014,8.5,music obsession drumming ambition teacher perfection
+La La Land,Comedy Drama Music,Damien Chazelle,2016,8.0,music love jazz dreams hollywood sacrifice
+Parasite,Comedy Drama Thriller,Bong Joon-ho,2019,8.5,class inequality family deception rich poor
+Get Out,Horror Mystery Thriller,Jordan Peele,2017,7.7,race horror suburbia mind control escape
+The Silence of the Lambs,Crime Drama Thriller,Jonathan Demme,1991,8.6,serial killer fbi cannibal psychology detective
+Joker,Crime Drama Thriller,Todd Phillips,2019,8.4,villain origin madness society isolation clown
+Black Panther,Action Adventure Sci-Fi,Ryan Coogler,2018,7.3,superhero king vibranium africa technology tradition
+Doctor Strange,Action Adventure Fantasy,Scott Derrickson,2016,7.5,magic multiverse doctor sorcery dimensions mystical
+Guardians of the Galaxy,Action Adventure Comedy,James Gunn,2014,8.0,space team humor aliens raccoon music
